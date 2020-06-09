@@ -73,10 +73,12 @@ func main() {
 	}
 
 	copts := &github.RepositoryContentGetOptions{}
-	fileContent, _, _, err := client.Repositories.GetContents(ctx, owner, repo, destpath, copts)
+	fileContent, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, destpath, copts)
 	if err != nil {
-		fmt.Println(err)
-		return
+		if resp == nil || (resp != nil && resp.StatusCode != 404) {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	sha := fileContent.GetSHA()
