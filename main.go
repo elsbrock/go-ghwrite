@@ -11,8 +11,8 @@ import "github.com/google/go-github/v32/github"
 import "golang.org/x/oauth2"
 
 var (
-	name      = flag.String("name", "Max Mustermann", "the author name")
-	email     = flag.String("email", "me@example.com", "the author email")
+	name      = flag.String("name", "", "the author name, defaults to the owner name of the token")
+	email     = flag.String("email", "", "the author email, defaults to the owner email of the token")
 	branch    = flag.String("branch", "master", "the git branch")
 	commitMsg = flag.String("commit-msg", "update submitted via go-ghwrite", "the commit message")
 )
@@ -26,6 +26,11 @@ func usage() {
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+
+	if (*name != "" && *email == "") || (*name == "" && *email != "") {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	var owner, repo, destpath string
 
@@ -110,10 +115,12 @@ func main() {
 	}
 
 	commit := &github.Commit{}
-	author := &github.CommitAuthor{}
-	author.Name = name
-	author.Email = email
-	commit.Author = author
+	if *name != "" {
+		author := &github.CommitAuthor{}
+		author.Name = name
+		author.Email = email
+		commit.Author = author
+	}
 	commit.Message = commitMsg
 	commit.Tree = tree
 	c := github.Commit{}
