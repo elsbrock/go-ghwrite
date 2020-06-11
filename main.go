@@ -4,6 +4,8 @@ import "os"
 import "flag"
 import "strings"
 import "fmt"
+import "archive/tar"
+import "io"
 import "io/ioutil"
 import "context"
 import "encoding/base64"
@@ -15,12 +17,20 @@ var (
 	email     = flag.String("email", "", "the author email, defaults to the owner email of the token")
 	branch    = flag.String("branch", "master", "the git branch")
 	commitMsg = flag.String("commit-msg", "update submitted via go-ghwrite", "the commit message")
+	readTar   = flag.Bool("read-tar", false, "interpret input as far and upload individual files")
 )
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage of: %s [opts] repo/slug:filename\n\nParameters:\n", os.Args[0])
 	flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, ("\nA valid Github token with scope `repo` is required in GOGHWRITE_TOKEN.\n"))
+}
+
+type GithubWriter struct {
+	ctx    context.Context
+	client *github.Client
+	owner  string
+	repo   string
 }
 
 func main() {
@@ -72,41 +82,72 @@ func main() {
 
 	client := github.NewClient(tc)
 
+	writer := GithubWriter{
+		ctx:    ctx,
+		client: client,
+		owner:  owner,
+		repo:   repo,
+	}
+
 	repoSHA, _, err := client.Repositories.GetCommitSHA1(ctx, owner, repo, *branch, "")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	data, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fblob := &github.Blob{}
-	b64c := "base64"
-	fblob.Encoding = &b64c
-	b64data := base64.StdEncoding.EncodeToString(data)
-	fblob.Content = &b64data
-
-	blob, _, err := client.Git.CreateBlob(ctx, owner, repo, fblob)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 	entries := make([]*github.TreeEntry, 0, 0)
-	fileSHA := blob.GetSHA()
-	mode := "100644"
-	blobType := "blob"
-	entry := github.TreeEntry{
-		SHA:  &fileSHA,
-		Path: &destpath,
-		Mode: &mode,
-		Type: &blobType,
+
+	if *readTar {
+		tr := tar.NewReader(os.Stdin)
+		for {
+			hdr, err := tr.Next()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			data, err := ioutil.ReadAll(tr)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			sha, err := writer.createBlob(data)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			path := hdr.Name
+			if destpath != "" {
+				path = destpath + "/" + path
+			}
+			fmt.Printf("staging %s\n", path)
+			entry := treeEntryBlob(path, sha)
+			entries = append(entries, entry)
+		}
+	} else {
+		data, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("staging %s\n", destpath)
+		sha, err := writer.createBlob(data)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		entry := treeEntryBlob(destpath, sha)
+		entries = append(entries, entry)
 	}
-	entries = append(entries, &entry)
+
+	if len(entries) == 0 {
+		return
+	}
 
 	tree, _, err := client.Git.CreateTree(ctx, owner, repo, repoSHA, entries)
 	if err != nil {
@@ -148,4 +189,30 @@ func main() {
 		return
 	}
 	fmt.Fprintf(os.Stderr, "committed as %s\n", commitSHA)
+}
+
+func (w GithubWriter) createBlob(data []byte) (string, error) {
+	fblob := &github.Blob{}
+	b64c := "base64"
+	fblob.Encoding = &b64c
+	b64data := base64.StdEncoding.EncodeToString(data)
+	fblob.Content = &b64data
+
+	blob, _, err := w.client.Git.CreateBlob(w.ctx, w.owner, w.repo, fblob)
+	if err != nil {
+		return "", err
+	}
+	return blob.GetSHA(), nil
+}
+
+func treeEntryBlob(path string, fileSHA string) *github.TreeEntry {
+	mode := "100644"
+	blobType := "blob"
+	entry := github.TreeEntry{
+		SHA:  &fileSHA,
+		Path: &path,
+		Mode: &mode,
+		Type: &blobType,
+	}
+	return &entry
 }
