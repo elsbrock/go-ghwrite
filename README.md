@@ -17,7 +17,7 @@ Parameters:
   -name string
         the author name, defaults to the owner name of the token
   -read-tar                                                                                        
-        interpret input as far and upload individual files
+        interpret input as tarball and upload individual files
                                                                                                    
 A valid Github token with scope `repo` is required in GOGHWRITE_TOKEN.
 ```
@@ -39,11 +39,16 @@ does not have `git` installed nor do I want to configure and maintain the key.
 Usage is quite simple: specify the target repository (e.g. `elsbrock/testrepo`)
 and the target file. If the target file does not exist it will be created,
 updated otherwise. If the target file contains slashes `/` these will be
-interpreted as directory. An empty target file may be used when reading from a
-tarball to represent the repository root, and all files of that tarball will be
-extracted into the root. Each successful call to the CLI will create a single
-commit, ie. when writing multiple files at once using the tarball method a
-single commit will be created for all of them.
+interpreted as directory.
+
+You may also submit multiple files using `-read-tar`; in that case the input
+must be an uncompressed tarball. An empty target file may be used when reading
+from a tarball to represent the repository root, and all files of that tarball
+will be extracted into the root.
+
+Each successful call to the CLI will create a single commit, ie. when writing
+multiple files at once using the tarball method a single commit will be created
+for all of them.
 
 If either `-name` or `-email` is given, both need to be provided. Otherwise the
 author information of the token owner is used.

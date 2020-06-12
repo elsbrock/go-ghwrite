@@ -17,7 +17,7 @@ var (
 	email     = flag.String("email", "", "the author email, defaults to the owner email of the token")
 	branch    = flag.String("branch", "master", "the git branch")
 	commitMsg = flag.String("commit-msg", "update submitted via go-ghwrite", "the commit message")
-	readTar   = flag.Bool("read-tar", false, "interpret input as far and upload individual files")
+	readTar   = flag.Bool("read-tar", false, "interpret input as tarball and upload individual files")
 )
 
 func usage() {
