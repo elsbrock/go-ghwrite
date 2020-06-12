@@ -1,5 +1,7 @@
 # go-ghwrite
 
+![Build](https://github.com/elsbrock/go-ghwrite/workflows/Build/badge.svg)
+
 Commit file(s) to Github repo using the GitHub API
 
 ## Synopsis
