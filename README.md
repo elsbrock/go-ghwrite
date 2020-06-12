@@ -41,7 +41,9 @@ and the target file. If the target file does not exist it will be created,
 updated otherwise. If the target file contains slashes `/` these will be
 interpreted as directory. An empty target file may be used when reading from a
 tarball to represent the repository root, and all files of that tarball will be
-extracted into the root.
+extracted into the root. Each successful call to the CLI will create a single
+commit, ie. when writing multiple files at once using the tarball method a
+single commit will be created for all of them.
 
 If either `-name` or `-email` is given, both need to be provided. Otherwise the
 author information of the token owner is used.
@@ -53,6 +55,12 @@ environment under the name `GOGHWRITE_TOKEN`.
 
 > Beware: this token is fairly powerful and cannot be restricted to selected
 > repositories only. Make sure it is stored securely.
+
+### Limitations
+
+The size of the files is limited by the GitHub API. Every file is read,
+base64-encoded and submitted synchronously via single HTTP requests, so you
+should not use this for large files.
 
 ### Examples
 
@@ -69,4 +77,4 @@ tar cvf - file1 file2 file3 | go-ghwrite -read-tar elsbrock/testrepo:
 
 ## License
 
-MIT-licensed
+MIT
