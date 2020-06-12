@@ -115,17 +115,18 @@ func main() {
 				return
 			}
 
+			fmt.Printf("staging %s… ", path)
 			sha, err := writer.createBlob(data)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
+			fmt.Println(sha)
 
 			path := hdr.Name
 			if destpath != "" {
 				path = destpath + "/" + path
 			}
-			fmt.Printf("staging %s\n", path)
 			entry := treeEntryBlob(path, sha)
 			entries = append(entries, entry)
 		}
