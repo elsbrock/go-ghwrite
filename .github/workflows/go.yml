@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  diskimage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Ensure all files were formatted as per gofmt
+      run: |
+        gofmt -l $(find . -name '*.go') >/dev/null
+
+    - name: run build (AMD64)
+      run: go build .
+
+    - name: run tests
+      run: go test ./...
+
+    - name: tar asset
+      run: tar -czvf go-ghwrite_linux-amd64.tar.gz go-ghwrite
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: go-ghwrite_linux-amd64.tar.gz
+
+    - name: run build (MIPS64)
+      run: GOOS=linux GOARCH=mips64 go build .
+
+    - name: tar asset
+      run: tar -czvf go-ghwrite_linux-mips64.tar.gz go-ghwrite
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: go-ghwrite_linux-mips64.tar.gz

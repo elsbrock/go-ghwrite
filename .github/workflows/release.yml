@@ -1,0 +1,67 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Ensure all files were formatted as per gofmt
+        run: |
+          gofmt -l $(find . -name '*.go') >/dev/null
+
+      - name: run build (AMD64)
+        run: go build .
+
+      - name: run tests
+        run: go test ./...
+
+      - name: tar asset
+        run: tar -czvf go-ghwrite_linux-amd64.tar.gz go-ghwrite
+
+      - name: run build (MIPS64)
+        run: GOOS=linux GOARCH=mips64 go build .
+
+      - name: tar asset
+        run: tar -czvf go-ghwrite_linux-mips64.tar.gz go-ghwrite
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset (AMD64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./go-ghwrite_linux-amd64.tar.gz
+          asset_name: go-ghwrite_linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Release Asset (MIPS64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./go-ghwrite_linux-mips64.tar.gz
+          asset_name: go-ghwrite_linux-mips64.tar.gz
+          asset_content_type: application/gzip
