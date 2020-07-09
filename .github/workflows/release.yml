@@ -35,6 +35,12 @@ jobs:
       - name: tar asset
         run: tar -czvf go-ghwrite_linux-mips64.tar.gz go-ghwrite
 
+      - name: run build (MIPS)
+        run: GOOS=linux GOARCH=mips go build .
+
+      - name: tar asset
+        run: tar -czvf go-ghwrite_linux-mips.tar.gz go-ghwrite
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
@@ -61,7 +67,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./go-ghwrite_linux-mips64.tar.gz
           asset_name: go-ghwrite_linux-mips64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Release Asset (MIPS)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./go-ghwrite_linux-mips.tar.gz
+          asset_name: go-ghwrite_linux-mips.tar.gz
           asset_content_type: application/gzip
