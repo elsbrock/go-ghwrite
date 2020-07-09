@@ -39,3 +39,13 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         path: go-ghwrite_linux-mips64.tar.gz
+
+    - name: run build (MIPS)
+      run: GOOS=linux GOARCH=mips go build .
+
+    - name: tar asset
+      run: tar -czvf go-ghwrite_linux-mips.tar.gz go-ghwrite
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: go-ghwrite_linux-mips.tar.gz
