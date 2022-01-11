@@ -40,6 +40,12 @@ jobs:
 
       - name: tar asset
         run: tar -czvf go-ghwrite_linux-mips.tar.gz go-ghwrite
+        
+      - name: run build (MIPSLE)
+        run: GOOS=linux GOARCH=mipsle go build .
+
+      - name: tar asset
+        run: tar -czvf go-ghwrite_linux-mipsle.tar.gz go-ghwrite
 
       - name: Create Release
         id: create_release
