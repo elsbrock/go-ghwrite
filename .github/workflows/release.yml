@@ -81,3 +81,13 @@ jobs:
           asset_path: ./go-ghwrite_linux-mips.tar.gz
           asset_name: go-ghwrite_linux-mips.tar.gz
           asset_content_type: application/gzip
+
+      - name: Upload Release Asset (MIPSLE)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./go-ghwrite_linux-mipsle.tar.gz
+          asset_name: go-ghwrite_linux-mipsle.tar.gz
+          asset_content_type: application/gzip
