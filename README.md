@@ -7,11 +7,17 @@ Commit file(s) to Github repo using the GitHub API
 ## Synopsis
 
 ```
-Usage of: ./go-ghwrite [opts] repo/slug:filename
+Usage of:
+
+  # single file
+  go-ghwrite [opts] repo/slug:targetfile < sourcefile
+
+  # multiple files
+  tar cvf - file1 file2 file3 | go-ghwrite -read-tar repo/slug:
 
 Parameters:
   -branch string
-        the git branch (default "master")
+        the git branch (default "main")
   -commit-msg string
         the commit message (default "update submitted via go-ghwrite")
   -email string

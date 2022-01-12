@@ -1,27 +1,39 @@
 package main
 
-import "os"
-import "flag"
-import "strings"
-import "fmt"
-import "archive/tar"
-import "io"
-import "io/ioutil"
-import "context"
-import "encoding/base64"
-import "github.com/google/go-github/v32/github"
-import "golang.org/x/oauth2"
+import (
+	"archive/tar"
+	"context"
+	"encoding/base64"
+	"flag"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"strings"
+
+	"github.com/google/go-github/v32/github"
+	"golang.org/x/oauth2"
+)
 
 var (
 	name      = flag.String("name", "", "the author name, defaults to the owner name of the token")
 	email     = flag.String("email", "", "the author email, defaults to the owner email of the token")
-	branch    = flag.String("branch", "master", "the git branch")
+	branch    = flag.String("branch", "main", "the git branch")
 	commitMsg = flag.String("commit-msg", "update submitted via go-ghwrite", "the commit message")
 	readTar   = flag.Bool("read-tar", false, "interpret input as tarball and upload individual files")
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage of: %s [opts] repo/slug:filename\n\nParameters:\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, `Usage of: %s [opts]
+
+  # single file
+  go-ghwrite [opts] repo/slug:targetfile < sourcefile
+
+  # multiple files
+  tar cvf - file1 file2 file3 | go-ghwrite -read-tar repo/slug:
+  
+Parameters:
+`, os.Args[0])
 	flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, ("\nA valid Github token with scope `repo` is required in GOGHWRITE_TOKEN.\n"))
 }
@@ -95,7 +107,7 @@ func main() {
 		return
 	}
 
-	entries := make([]*github.TreeEntry, 0, 0)
+	entries := make([]*github.TreeEntry, 0)
 
 	if *readTar {
 		tr := tar.NewReader(os.Stdin)
