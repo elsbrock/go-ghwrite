@@ -1,6 +1,6 @@
 module github.com/elsbrock/go-ghwrite
 
-go 1.14
+go 1.19
 
 require (
 	github.com/google/go-cmp v0.5.6 // indirect
