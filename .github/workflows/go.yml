@@ -26,7 +26,7 @@ jobs:
     - name: tar asset
       run: tar -czvf go-ghwrite_linux-amd64.tar.gz go-ghwrite
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: go-ghwrite_linux-amd64.tar.gz
 
@@ -36,7 +36,7 @@ jobs:
     - name: tar asset
       run: tar -czvf go-ghwrite_linux-mips64.tar.gz go-ghwrite
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: go-ghwrite_linux-mips64.tar.gz
 
@@ -46,7 +46,7 @@ jobs:
     - name: tar asset
       run: tar -czvf go-ghwrite_linux-mips.tar.gz go-ghwrite
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: go-ghwrite_linux-mips.tar.gz
 
@@ -56,6 +56,6 @@ jobs:
     - name: tar asset
       run: tar -czvf go-ghwrite_linux-mipsle.tar.gz go-ghwrite
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: go-ghwrite_linux-mipsle.tar.gz
