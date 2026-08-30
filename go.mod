@@ -1,11 +1,23 @@
 module github.com/elsbrock/go-ghwrite
 
-go 1.14
+go 1.23.0
 
 require (
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/go-github/v57 v57.0.0
+	golang.org/x/oauth2 v0.27.0
+)
+
+require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	golang.org/x/oauth2 v0.15.0
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 // indirect
+	golang.org/x/net v0.0.0-20190603091049-60506f45cf65 // indirect
+	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a // indirect
+	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e // indirect
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )
